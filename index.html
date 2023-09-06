@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="description" content="Diseño y nuevos medios" />
+        <style>
+            /* (*-> se aplica a toda la página) */
+            *,
+            *::before,
+            *::after {
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                color: rgba(225, 225, 225, 0.6);
+                background: #974900;
+                font-family: Helvetica, Arial, sans-serif;
+                /* 1rem = 16px */
+                font-size: 1rem;
+            }
+
+            a {
+                color: rgba(225, 225, 225, 0.4);
+                text-decoration: underline;
+            }
+            /* mouse encima */
+            a:hover {
+                color: rgba(255, 255, 255, 1);
+                text-decoration: none;
+            }
+
+            div.container {
+                padding: 0 5vw 5vh;
+            }
+            /* la coma (,) es para ambas */
+            header,
+            footer {
+                padding: 4% 2%;
+            }
+
+            header h1 {
+                font-size: calc(1rem + 3.5vw);
+                color: rgba(225, 225, 225, 0.9);
+                line-height: 1.3;
+                text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+            }
+
+            header h2 {
+                font-size: calc(1rem + 1.75vw);
+                line-height: 1.3;
+                text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+            }
+
+            section {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            section article {
+                width: 16%;
+                margin: 1%;
+                padding: 1%;
+                background: rgba(149, 148, 148, 0.5);
+                border-radius: 5px 5px;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            }
+
+            /*Este sirve para cambiar el color de los terremotos según el país elegido
+            */
+
+            section article.cl {
+                color: rgba(250, 174, 139, 0.9);
+            }
+
+            section article.ind {
+                color: rgba(250, 211, 139, 0.9);
+            }
+
+            section article.ja {
+                color: rgba(250, 139, 139 , 0.9);
+            }
+
+            section article.hw {
+                color: rgba(250, 139, 218, 0.9);
+            } 
+
+            section article h3 {
+            /* vw = viewpoint width || Se suma ambos para cuando c achica || # = Identidad*/
+                font-size: calc(3rem + 2vw);
+                line-height: 1;
+            }
+
+            section article p {
+                font-size: 1rem;
+                padding: 0.5rem 0;
+            }
+            /* identificar tamaño de ancho de la pantalla */
+            @media (max-width: 767.98px) {
+                header,
+                footer {
+                    padding: 5%;
+                }
+
+                section article {
+                /*pagging (pa dentro) margin (pa juera); los porcentajes de estos se suman al width por lo que no seria 40% en este caso, sino que seria 50%*/ 
+                    width: 40%;
+                    margin: 2%;
+                    padding: 3%;
+                }
+            }
+
+            footer p {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            #opciones {
+                top: 1rem;
+                right: 1rem;
+                position: fixed;
+                padding: 0.25rem;
+                border-radius: 5px 5px;
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            }
+        </style>
+        <title>DNO037</title>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>M2.5+ Earthquakes</h1>
+                <h2>Past 30 days. Updated every minute</h2>
+            </header>
+            <main>
+                <section></section>
+            </main>
+            <footer>
+                <p><a href="#">Isabella Cicarelli</a> <a href="#">DNO037</a></p>
+            </footer>
+        </div>
+        <select name="select" id="opciones">
+            <option>All</option>
+            // opciones de selección en la página
+            <option value="Japan">Japan</option>
+             <option value="Chile">Chile</option>
+             <option value="Indonesia">Indonesia</option>
+             <option value="Hawaii">Hawaii</option>
+
+
+        </select>
+        <!--Primero vamos a buscar la versión más reciente de jQuery-->
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <!--Y ahora podemos usarlo-->
+        <script>
+            $(function () {
+                $.getJSON("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_month.geojson", function (data) {
+                    console.log(data);
+                    //una pequeña función para convertir un dato de más abajo
+                    function registro(unix_timestamp) {
+                        var date = new Date(unix_timestamp);
+                        return date;
+                    }
+                    //un forEach para construir cada t
+                    data.features.forEach(function (t, i) {
+                        var articuloTipo;
+                        //par de alternativas para la variable articuloTipo
+                        if (t.properties.place.includes("Japan")) { articuloTipo = '<article class="ja">'; } else if (t.properties.place.includes("Chile")){ articuloTipo = '<article class="cl">';} else if (t.properties.place.includes("Indonesia")){ articuloTipo = '<article class="ind">';} else if (t.properties.place.includes("Hawaii")){ articuloTipo = '<article class="hw">';}else { articuloTipo = '<article class="etc">';}
+                        //aplicación del articuloTipo y la pequeña función
+                        $("section").append(`${articuloTipo}<h3>${t.properties.mag.toFixed(1)}</h3><p>${t.properties.place}</p><p><a href="${t.properties.url}" target="_blank" rel="noopener noreferrer">${registro(t.properties.time)}</a></p></article>`);
+                    });
+                    //algo más para interactuar con el menú
+                    var valor;
+                    $("#opciones").change(function () {
+                        valor = $("select").val();
+                    /* para que se despliegue la página se tienen que establecer condiciones; si muestro una tengo que esconder la otra sino se verá*/
+                        if (valor == "Japan") {
+                            $(".etc, .cl, .ind, .hw").hide(); $(".ja").show();
+                        } else if (valor == "Chile"){
+                            $(".etc, .ja, .ind, .hw").hide(); $(".cl").show();
+                        } else if (valor == "Hawaii"){
+                            $(".etc, .ja, .cl, .ind").hide(); $(".hw").show();
+                         } else if (valor == "Indonesia"){
+                            $(".etc, .ja, .cl, .hw").hide(); $(".ind").show();
+                        }
+                        else {
+                            $(".cl, .etc, .ja, .ind, .hw").show();
+                        }
+                    });
+                }); // cierro $.getJSON((){});
+            }); //cierro $(function(){});
+        </script>
+    </body>
+</html>
